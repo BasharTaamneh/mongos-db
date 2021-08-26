@@ -9,8 +9,9 @@ const { request } = require('http');
 const server = express();
 
 server.use(cors());
-
 require('dotenv').config();
+
+server.use(express.json());
 
 const PORT = process.env.PORT;
 
@@ -29,11 +30,14 @@ db.once('open', function () {
 });
 
 
+
 const BookSchema = new mongoose.Schema({
-    title: String,
-    status: String,
     email: String,
-    Booksrc: String,
+    bookname: String,
+    bookdiscr: String,
+    bookstatus: String,
+    author_name: String,
+    Book_src: String,
 });
 
 
@@ -41,42 +45,53 @@ const Bookinfomodal = new mongoose.model('Bookinfo', BookSchema);
 
 
 function SEEDBookinfomodal() {
-    const book1 = new Bookinfomodal({
-        title: 'BIG MAGIC',
-        status: 'readed',
-        email: 'BasharTaamneh55@gmail.com',
-        Booksrc:'https://kbimages1-a.akamaihd.net/b3f00c5f-ec69-4df8-8786-8da68bd60901/1200/1200/False/big-magic-7.jpg'
-    });
-    const book2 = new Bookinfomodal({
-        title: 'DARING GREATLY',
-        status: 'unreaded',
-        email: 'BasharTaamneh55@gmail.com',
-        Booksrc:'https://images-na.ssl-images-amazon.com/images/I/816gtATacXL.jpg'
-    });
-    const book3 = new Bookinfomodal({
-        title: 'WHEN',
-        status: 'in discover',
-        email: 'BasharTaamneh55@gmail.com',
-        Booksrc:'https://images-na.ssl-images-amazon.com/images/I/71pjsvmP0XL.jpg'
-    });
-    book1.save();
-    book2.save();
-    book3.save();
-}
 
+    const book1 = new Bookinfomodal({
+        email: 'BasharTaamneh55@gmail.com',
+        bookname: 'BIG MAGIC',
+        bookdiscr:"in progres",
+        bookstatus: 'readed',
+        author_name:"bashar",
+        Book_src:'https://kbimages1-a.akamaihd.net/b3f00c5f-ec69-4df8-8786-8da68bd60901/1200/1200/False/big-magic-7.jpg'
+    })
+    book1.save();
+}
+// SEEDBookinfomodal();
 
 server.get('/books', (getbooksdata));
 
-//http://localhost:3001/books?utitle=exambl
+//http://localhost:3001/books?uemail=exambl
 function getbooksdata(request, response) {
-    let utitle = request.query.utitle
-    Bookinfomodal.find({  }, function (error, status) {
+    let uemail = request.query.uemail
+    Bookinfomodal.find({email:uemail  }, function (error, emaildata) {
         if (error) { console.error(error); }
-        else { response.send(status); }
+        else { response.send(emaildata); }
     })
 }
 
+server.post('/Addbook',(AddbookHandler));
 
+function AddbookHandler(request, response){
+    //  requestdata: {
+//     email: 'bashartaamneh55@gmail.com',
+//     bookname: 'the old see',
+//     bookdiscr: 'readed',
+//     bookstatus: 'readed book stil',
+//     author_name: 'Jonathan Hale',
+//     Book_src: 'https://covers.openlibrary.org/b/isbn/0395605733-M.jpg'
+//   }
+let {email,bookname,bookdiscr,bookstatus,author_name,Book_src}= request.body;
+const newbook = new Bookinfomodal({
+    email: email,
+    bookname: bookname,
+    bookdiscr:bookdiscr,
+    bookstatus:bookstatus,
+    author_name:author_name,
+    Book_src:Book_src
+})
+newbook.save();
+    console.log(request.body);
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
