@@ -84,8 +84,8 @@ function deletebookHandler(req,response) {
 
     let email= req.query.uemail;
     console.log(email)
-    let bookDataID = req.params.catId2;
-    Bookinfomodal.deleteOne({_ID:bookDataID},(error,bookDataID)=>{
+    let bookDataID = req.params.bookId;
+    Bookinfomodal.deleteOne({_id: bookDataID},(error,bookDataID)=>{
         if(error) {
             console.log('error in deleteing the data')
         } else {
