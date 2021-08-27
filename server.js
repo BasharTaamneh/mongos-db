@@ -10,7 +10,7 @@ const server = express();
 
 server.use(cors());
 require('dotenv').config();
-
+server.use(express.urlencoded({extended:false}));
 server.use(express.json());
 
 const PORT = process.env.PORT;
@@ -22,14 +22,13 @@ mongoose.connect('mongodb://localhost:27017/BOOKSINFO', { useNewUrlParser: true,
 const db = mongoose.connection;
 
 const { query } = require('express');
-
+///////////////////////////////////////////////
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function () {
     // we're connected!
     console.log('connected to database');
 });
-
-
+//////////////////////////////////////////////
 
 const BookSchema = new mongoose.Schema({
     email: String,
@@ -42,22 +41,7 @@ const BookSchema = new mongoose.Schema({
 
 
 const Bookinfomodal = new mongoose.model('Bookinfo', BookSchema);
-
-
-function SEEDBookinfomodal() {
-
-    const book1 = new Bookinfomodal({
-        email: 'BasharTaamneh55@gmail.com',
-        bookname: 'BIG MAGIC',
-        bookdiscr:"in progres",
-        bookstatus: 'readed',
-        author_name:"bashar",
-        Book_src:'https://kbimages1-a.akamaihd.net/b3f00c5f-ec69-4df8-8786-8da68bd60901/1200/1200/False/big-magic-7.jpg'
-    })
-    book1.save();
-}
-// SEEDBookinfomodal();
-
+////////////////////////////////////////////////////
 server.get('/books', (getbooksdata));
 
 //http://localhost:3001/books?uemail=exambl
@@ -68,33 +52,59 @@ function getbooksdata(request, response) {
         else { response.send(emaildata); }
     })
 }
-
+////////////////////////////////////////
 server.post('/Addbook',(AddbookHandler));
 
-function AddbookHandler(request, response){
-    //  requestdata: {
-//     email: 'bashartaamneh55@gmail.com',
-//     bookname: 'the old see',
-//     bookdiscr: 'readed',
-//     bookstatus: 'readed book stil',
-//     author_name: 'Jonathan Hale',
-//     Book_src: 'https://covers.openlibrary.org/b/isbn/0395605733-M.jpg'
-//   }
+async function AddbookHandler(request, response){
+
 let {email,bookname,bookdiscr,bookstatus,author_name,Book_src}= request.body;
-const newbook = new Bookinfomodal({
-    email: email,
-    bookname: bookname,
-    bookdiscr:bookdiscr,
-    bookstatus:bookstatus,
-    author_name:author_name,
-    Book_src:Book_src
+await Bookinfomodal.create({email,bookname,bookdiscr,bookstatus,author_name,Book_src})
+
+Bookinfomodal.find({ email }, function (err, emailData) {
+    if (err) {
+        console.log('error in getting the data')
+    } else {
+        console.log(emailData);
+        response.send(emailData)
+    }
 })
-newbook.save();
     console.log(request.body);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
+server.delete('/deletbook/:bookId',deletebookHandler);
+
+function deletebookHandler(req,response) {
+    // console.log(req.query.bookId)
+    // console.log('inside the deleteCatHandler')
+    console.log(req)
+    console.log(req.params)
+    console.log(req.params.bookId);
+
+    let email= req.query.uemail;
+    console.log(email)
+    let bookDataID = req.params.catId2;
+    Bookinfomodal.deleteOne({_ID:bookDataID},(error,bookDataID)=>{
+        if(error) {
+            console.log('error in deleteing the data')
+        } else {
+            console.log('data deleted', bookDataID) 
+            Bookinfomodal.find({ email }, function (err, emailData) {
+                if (err) {
+                    console.log('error in getting the data')
+                } else {
+                    console.log(emailData);
+                    response.send(emailData)
+                }
+            })
+        }
+    })
+
+
+
+}
+////////////////////////////////////////////////////////////////////////////////////////
 server.get('/', (request, response) => {
     response.send("ready to start server");
 })
