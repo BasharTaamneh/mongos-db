@@ -17,7 +17,7 @@ const PORT = process.env.PORT;
 
 const mongoose = require('mongoose');
 
-mongoose.connect(process.env.MONGODB_LOCAL_LINK, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(process.env.MONGODB_LOCAL_LINK, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false });
 
 const db = mongoose.connection;
 
@@ -68,7 +68,7 @@ async function AddbookHandler(request, response) {
             response.send(emailData)
         }
     })
-    console.log(request.body);
+    // console.log(request.body);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -92,7 +92,7 @@ function deletebookHandler(req, response) {
                 if (err) {
                     console.log('error in getting the data')
                 } else {
-                    console.log(emailData);
+                    // console.log(emailData);
                     response.send(emailData)
                 }
             })
@@ -103,35 +103,29 @@ function deletebookHandler(req, response) {
 
 }
 ////////////////////////////////////////////////////////////////////////////////////////
-server.put('/Updatebook/:book_ID', Updatebookhandler);
+server.put('/Updatebook/:bookID', Updatebookhandler);
 
 function Updatebookhandler(request, response) {
-    let Book_id = request.params.book_ID
-    //   console.log(Book_id)
-      console.log('sssssssssss',request.body)
-    let {author_name, Book_src, bookname, bookdiscr, bookstatus, uemail } = request.body;
+    let bookId = request.params.bookID
+    let uemail = request.body.email
+    console.log(bookId)
+    let { author_name, Book_src, bookname, bookdiscr, bookstatus, email } = request.body;
+    console.log('sssssssssss', request.body)
 
-    Bookinfomodal.find({ _id: Book_id }, (error, Book_id) => {
+    Bookinfomodal.findByIdAndUpdate(bookId, { author_name, Book_src, bookname, bookdiscr, bookstatus, email }, (error, newdata) => {
         if (error) {
             console.log('error in updating the data')
         }
         else {
-            // console.log(Book_id) 
-            Book_id[0].bookname = bookname;
-            Book_id[0].bookdiscr = bookdiscr;
-            Book_id[0].bookstatus = bookstatus;
-            Book_id[0].author_name=author_name;
-            Book_id[0].Book_src=Book_src;
-            Book_id[0].uemail=uemail;
-            Book_id[0].save().then(() => {
-                Bookinfomodal.find({ uemail }, function (err, emailData) {
-                    if (err) {
-                        console.log('error in getting the data')
-                    } else {
-                        console.log('aaaaaaaaaa'.emailData);
-                        response.send(emailData)
-                    }
-                })
+            // console.log(data)
+            console.log("Data updated!");
+            Bookinfomodal.find({ email: uemail }, function (err, data) {
+                if (err) {
+                    console.log('error in getting the data')
+                } else {
+                    console.log(data);
+                    response.send(data);
+                }
             })
         }
     }
